@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	fmt.Println("webkit v1.1.0")
+	fmt.Println("webkit v1.1.1")
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("请输入项目名称（默认'test_webkit'）：")
 	input, err := reader.ReadString('\n')
@@ -25,7 +25,7 @@ func main() {
 		log.Fatal(err)
 	}
 	projectName := strings.ReplaceAll(input, "\n", "")
-	projectName = strings.ReplaceAll(input, "\r", "")
+	projectName = strings.ReplaceAll(projectName, "\r", "")
 	if projectName == "" {
 		projectName = "test_webkit"
 	}
@@ -36,7 +36,7 @@ func main() {
 		log.Fatal(err)
 	}
 	objPath := strings.ReplaceAll(input, "\n", "")
-	objPath = strings.ReplaceAll(input, "\r", "")
+	objPath = strings.ReplaceAll(objPath, "\r", "")
 	objPath = filepath.Join(objPath, projectName)
 
 	var dbType string
@@ -47,7 +47,7 @@ func main() {
 			log.Fatal(err)
 		}
 		dbType = strings.ReplaceAll(input, "\n", "")
-		dbType = strings.ReplaceAll(input, "\r", "")
+		dbType = strings.ReplaceAll(dbType, "\r", "")
 		if dbType == "" {
 			dbType = "pg"
 		}
