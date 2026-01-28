@@ -1,14 +1,16 @@
 package config
 
 import (
+	"os"
+	"strconv"
+	"time"
+	"webkit/kit/zlogger"
+	"webkit/util"
+
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/gorm/logger"
-	"os"
-	"time"
-	logger2 "webkit/kit/logger"
-	"webkit/util"
 )
 
 /**
@@ -24,13 +26,14 @@ var Conf Config
 // InitByEnv 通过环境变量加载配置
 func InitByEnv() {
 	Conf.Server = ServerConf{
-		Port: GetEnvString("SERVER_PORT", ":3000"),
+		Port: GetEnv("SERVER_PORT", ":3000"),
 	}
 	Conf.DB = DBConf{
-		Type: GetEnvString("DB_TYPE", "pg"),
-		Conn: GetEnvString("DB_CONN", "host=127.0.0.1 port=5432 user=cella dbname=test password=111111"),
+		Type: GetEnv("DB_TYPE", "pg"),
+		Conn: GetEnv("DB_CONN", "host=127.0.0.1 port=5432 user=cella dbname=test password=111111"),
+		LogLevel: GetEnv("DB_LOG_LEVEL", logger.Info),
 	}
-	Conf.Logger = logger2.DefaultLog()
+	Conf.Logger = zlogger.DefaultLog()
 }
 
 // InitByFile 通过文件加载配置
@@ -46,18 +49,44 @@ func InitByFile(fileName string) {
 	viper.Reset() // 释放viper内存
 }
 
-// GetEnvString 获取环境变量
-func GetEnvString(key string, defaultValue string) string {
-	value := os.Getenv(key)
-	if len(value) != 0 {
-		return value
+// GetEnv 获取环境变量
+func GetEnv[T any](key string, defaultValue T) T {
+	valueStr := os.Getenv(key)
+	if valueStr == "" {
+		return defaultValue
 	}
-	return defaultValue
+
+	var value T
+	switch any(defaultValue).(type) {
+	case string:
+		value = any(valueStr).(T)
+	case int:
+		v, err := strconv.Atoi(valueStr)
+		if err != nil {
+			return defaultValue
+		}
+		value = any(v).(T)
+	case bool:
+		v, err := strconv.ParseBool(valueStr)
+		if err != nil {
+			return defaultValue
+		}
+		value = any(v).(T)
+	case float64:
+		v, err := strconv.ParseFloat(valueStr, 64)
+		if err != nil {
+			return defaultValue
+		}
+		value = any(v).(T)
+	default:
+		return defaultValue
+	}
+	return value
 }
 
 type Config struct {
 	Server ServerConf
-	Logger *logger2.Option
+	Logger *zlogger.Option
 	DB     DBConf
 	Redis  *redis.Options
 }

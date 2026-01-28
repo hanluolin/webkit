@@ -3,19 +3,20 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 	"webkit/config"
-	"webkit/kit/logger"
 	"webkit/kit/validator"
+	"webkit/kit/zlogger"
 	"webkit/middleware"
 	"webkit/model"
 	"webkit/router"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -24,8 +25,8 @@ func main() {
 	// config.InitByFile("config.yaml")
 
 	// 日志初始化
-	logger.Init(config.Conf.Logger)
-	defer logger.Sync()
+	zlogger.Init(config.Conf.Logger)
+	defer zlogger.Sync()
 
 	engine := gin.New()
 	engine.Use(middleware.Log, gin.RecoveryWithWriter(&middleware.RecoverWriter{}))
@@ -49,6 +50,7 @@ func run(engine *gin.Engine) {
 		Addr:    config.Conf.Server.Port,
 		Handler: engine,
 	}
+	zap.S().Info("server is running at " + server.Addr)
 
 	// 启动 HTTP 服务器（非阻塞）
 	go func() {

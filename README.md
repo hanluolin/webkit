@@ -11,7 +11,7 @@
 - 安装
 
 ```shell
-go install github.com/LorinHan/webkit@latest
+go install github.com/hanluolin/webkit@latest
 ```
 
 - 使用
@@ -36,7 +36,7 @@ webkit
 main.go
 
 ...
-// 创建一个平滑关闭的超时上下文
+// 带有平滑退出的超时控制
 ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 defer cancel()
 
@@ -162,7 +162,7 @@ type TestValidatorReq struct {
 
 ##### 5.gorm相关
 - 结合了zap，gorm日志将由zap代理
-- 错误处理，controller层使用Fail方法进行响应时，Fail方法内对gorm的err做了处理，避免数据库相关错误信息直接返回
+- 错误处理，controller层使用Fail方法进行响应时，Fail方法内对gorm的err做了处理，避免返回数据库的详细错误信息，而是将错误信息打到log
 ```go
 data, err := service.HelloSvc.SayHi()
 if err != nil {
@@ -173,12 +173,12 @@ if err != nil {
 
 ##### 6.cache
 - 集成go-redis
-- [aop封装](https://github.com/LorinHan/webkit/blob/main/template/kit/cache/redis_aop.go#L11)，以aop方式加入缓存切面
+- [aop封装](https://github.com/hanluolin/webkit/blob/main/template/kit/cache/redis_aop.go#L11)，以aop方式加入缓存切面
 - Cacheable：执行回调函数前会查询缓存，若key不存在则执行回调，将回调执行结果放入缓存，若key存在，将数据映射到参数v(应传入指针)且不执行回调函数
 - Put：执行回调函数后，将回调执行结果放入缓存，与Cacheable不同的是Put不会进行前置查询，常用于更新操作 
 - Evict：执行回调函数后，删除该key的缓存 
 - Put和Evict有以ByDynamicKey为后缀的扩展，可通过回调函数的返回值来设定key
-- [示例：kit/cache/redis_aop_test.go](https://github.com/LorinHan/webkit/blob/main/template/kit/cache/redis_aop_test.go)
+- [示例：kit/cache/redis_aop_test.go](https://github.com/hanluolin/webkit/blob/main/template/kit/cache/redis_aop_test.go)
 ```go
 kit/cache/redis_aop_test.go
 
@@ -211,4 +211,36 @@ func TestCacheable(t *testing.T) {
 ```
 ##### 7.常用工具 util包
 - ordermap.go 支持序列化、反序列化的有序map
--
+- util.CallApi 接口调用
+    - 普通调接口
+
+    ```go
+    var (
+        req = map[string]interface{}{"name": "lorin"} // 定义接口参数
+        resp param.TestResp // 定义接口响应
+    )
+    if err = util.CallApi("http://127.0.0.1/api/v1/xxx", "POST", 10*time.Second, &req, &uploadResp); err != nil {
+        return fmt.Errorf("API调用错误: %v", err)
+    }
+    fmt.Println(resp)
+    ```
+
+    - 传文件
+
+    ```go
+    fileBytes, err := os.ReadFile("/xx/xx.docx")
+    if err != nil {
+        return err
+    }
+    fileHeader := &util.CustomFileHeader{
+        FileBytes: fileBytes,
+        Filename:  info.Name(),
+        Size:      info.Size(),
+    }
+    // 上传文件
+    var uploadResp param.FileUploadResp // 定义接口响应
+    if err = util.CallApi("http://127.0.0.1/api/v1/upload", "POST", 120*time.Second, fileHeader, &uploadResp); err != nil {
+        return fmt.Errorf("文件上传失败: %v", err)
+    }
+    fmt.Println(uploadResp)
+    ```

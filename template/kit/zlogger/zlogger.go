@@ -1,11 +1,12 @@
-package logger
+package zlogger
 
 import (
+	"os"
+	"time"
+
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
-	"time"
 )
 
 type Option struct {

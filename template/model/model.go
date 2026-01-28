@@ -2,15 +2,16 @@ package model
 
 import (
 	"errors"
+	"log"
+	"strings"
+	"time"
+	"webkit/config"
+
 	"github.com/LorinHan/dm-driver/dmgorm2"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
-	"strings"
-	"time"
-	"webkit/config"
 )
 
 var db *gorm.DB
@@ -34,7 +35,7 @@ func Init(dbConf config.DBConf) error {
 	)
 
 	if dbConf.LogLevel == 0 {
-		logConf.LogLevel = logger.Warn // 默认Warn级别（慢查询）
+		logConf.LogLevel = logger.Info // 默认Warn级别（慢查询）
 	}
 	conf.Logger = logger.New(log.New(&GormLogger{}, "", 0), logConf)
 

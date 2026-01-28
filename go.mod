@@ -1,4 +1,4 @@
-module github.com/LorinHan/webkit
+module github.com/hanluolin/webkit
 
 go 1.20
 

@@ -5,18 +5,19 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
-	_ "github.com/LorinHan/webkit/statik"
-	"github.com/rakyll/statik/fs"
 	"io"
 	fs2 "io/fs"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	_ "github.com/hanluolin/webkit/statik"
+	"github.com/rakyll/statik/fs"
 )
 
 func main() {
-	fmt.Println("webkit v1.0.8")
+	fmt.Println("webkit v1.0.9")
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("请输入项目名称（默认'test_webkit'）：")
 	input, err := reader.ReadString('\n')
